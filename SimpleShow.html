@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function login(username, password) {
+            $.post("/MyAU/API/stadsdata.php",
+                    {
+                        username: username,
+                        password: password
+                    },
+                    function (data, status) {
+                        var gradeTableBody = $("#gradeTableBody");
+                        gradeTableBody.empty();
+                        for (var i = 0; i < data.grades.length; i++) {
+                            var tr = document.createElement("tr");
+                            var courseTd = document.createElement("td");
+                            var gradeTd = document.createElement("td");
+                            var ectsTd = document.createElement("td");
+                            gradeTableBody.append(tr);
+                            tr.appendChild(courseTd);
+                            tr.appendChild(gradeTd);
+                            tr.appendChild(ectsTd);
+
+                            courseTd.textContent = data.grades[i].courseName;
+                            gradeTd.textContent = data.grades[i].grade;
+                            ectsTd.textContent = data.grades[i].ects;
+                        }
+                        var meritTableBody = $("#meritTableBody");
+                        meritTableBody.empty();
+                        for (i = 0; i < data.merits.length; i++) {
+                            tr = document.createElement("tr");
+                            courseTd = document.createElement("td");
+                            gradeTd = document.createElement("td");
+                            ectsTd = document.createElement("td");
+                            meritTableBody.append(tr);
+                            tr.appendChild(courseTd);
+                            tr.appendChild(gradeTd);
+                            tr.appendChild(ectsTd);
+
+                            courseTd.textContent = data.merits[i].courseName;
+                            gradeTd.textContent = data.merits[i].grade;
+                            ectsTd.textContent = data.merits[i].ects;
+                        }
+                    });
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#loginForm").submit(function (e) {
+                e.preventDefault();
+                var form = this;
+                login($(form).find("input[name=username]").val(), $(form).find("input[name=password]").val());
+                return false;
+            })
+        });
+    </script>
+</head>
+<body>
+<form id="loginForm">
+    <input type="text" name="username" placeholder="Årskort">
+    <input type="password" name="password" placeholder="Password">
+    <input type="submit">
+</form>
+<table id="gradeTable">
+    <thead>
+    <tr>
+        <th>Course</th>
+        <th>Grade</th>
+        <th>ECTS</th>
+    </tr>
+    </thead>
+    <tbody id="gradeTableBody">
+    </tbody>
+</table>
+<table id="meritTable">
+    <thead>
+    <tr>
+        <th>Course</th>
+        <th>Grade</th>
+        <th>ECTS</th>
+    </tr>
+    </thead>
+    <tbody id="meritTableBody">
+    </tbody>
+</table>
+</body>
+</html>

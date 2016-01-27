@@ -128,7 +128,7 @@
             averageProgressionChartData.labels = StadsDataHandler.getAllPassedGradesSorted().map(function (grade) {
                 return grade.courseName;
             });
-            progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true});
+            progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true, pointHitDetectionRadius: 0});
             var ctx = document.getElementById("gradeChart").getContext("2d");
             gradeChartData.datasets[0].data = StadsDataHandler.getGradeDistribution();
             gradeChart = new Chart(ctx).Bar(gradeChartData, {responsive: true});
@@ -190,7 +190,7 @@
         };
         // Get the context of the canvas element we want to select
         var ctx = document.getElementById("averageProgressionChart").getContext("2d");
-        progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true});
+        progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true, pointHitDetectionRadius: 0});
         var ctx = document.getElementById("gradeChart").getContext("2d");
         gradeChart = new Chart(ctx).Bar(gradeChartData, {responsive: true});
         var ctx = document.getElementById("passedGradesChart").getContext("2d");

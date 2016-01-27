@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js" type="text/javascript"></script>
+
+    <!-- Foundation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation.css"
+          type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.1.2/foundation.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
+
+    <script src="js/StadsDataHandler.js" type="text/javascript"></script>
+</head>
+<body>
+<span style="color: red;">Warning, there are no encryption going on yet. Use at your own discretion.</span>
+<div class="top-bar">
+    <div class="top-bar-left">
+        <form id="loginForm">
+            <div class="row">
+                <div class="large-4 columns">
+                    <label>Input Label
+                        <input type="text" name="username" placeholder="Årskort">
+                    </label>
+                </div>
+                <div class="large-4 columns">
+                    <label>Input Label
+                        <input type="password" name="password" placeholder="Password">
+                    </label>
+                </div>
+                <div class="large-4 columns">
+                    <label>
+                        <input type="submit" value="Login" class="button">
+                    </label>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row" id="content">
+    <!-- Pizza
+        <div class="medium-3 columns">
+            <ul data-bar-id="bar" id="nar" style="list-style: none;">
+                <li data-value="200">Pepperoni</li>
+                <li data-value="20">Sausage</li>
+                <li data-value="112">Cheese</li>
+                <li data-value="232">Mushroom</li>
+                <li data-value="98">Chicken</li>
+                <li data-value="134">Other</li>
+            </ul>
+        </div>
+        <div class="medium-5 columns">
+            <div id="bar" style="height: 200px"></div>
+        </div>
+        -->
+    <div class="medium-9 columns">
+        <h1>Your grade statistics:</h1>
+        <div class="row">
+            <div class="medium-9 columns">
+                <h3>Passed grades</h3>
+                <canvas id="passedGradesChart" style="width: auto; height: auto"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="medium-9 columns">
+                Average = <span id="gradeAverage">0</span> <br/>
+                Weighted average = <span id="weightedGradeAverage">0</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="medium-9 columns">
+                <h3>Average progression</h3>
+                <canvas id="averageProgressionChart" style="width: auto; height: auto"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="medium-9 columns">
+                <h3>All grades</h3>
+                <canvas id="gradeChart" style="width: auto; height: auto"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="medium-3 columns">
+        <h4>Grades</h4>
+        <table id="gradeTable">
+            <thead>
+            <tr>
+                <th>Course</th>
+                <th>Grade</th>
+                <th>ECTS</th>
+            </tr>
+            </thead>
+            <tbody id="gradeTableBody">
+            </tbody>
+        </table>
+        <h4>Merits</h4>
+        <table id="meritTable">
+            <thead>
+            <tr>
+                <th>Course</th>
+                <th>Grade</th>
+                <th>ECTS</th>
+            </tr>
+            </thead>
+            <tbody id="meritTableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+<footer>
+    <!-- Foundation -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg.js" type="text/javascript"></script>
+    <script src="js/pizza.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        StadsDataHandler.bindToForm("#loginForm");
+        StadsDataHandler.loggedIn = function () {
+            StadsDataHandler.fillGradeTable("#gradeTableBody");
+            StadsDataHandler.fillMeritTable("#meritTableBody");
+            /*Pizza.init("#bar", {
+             data: StadsDataHandler.getGradeDistribution()
+             });*/
+            var ctx = document.getElementById("averageProgressionChart").getContext("2d");
+            averageProgressionChartData.datasets[0].data = StadsDataHandler.getAverageProgression();
+            averageProgressionChartData.labels = StadsDataHandler.getAllPassedGradesSorted().map(function (grade) {
+                return grade.courseName;
+            });
+            progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true});
+            var ctx = document.getElementById("gradeChart").getContext("2d");
+            gradeChartData.datasets[0].data = StadsDataHandler.getGradeDistribution();
+            gradeChart = new Chart(ctx).Bar(gradeChartData, {responsive: true});
+            var ctx = document.getElementById("passedGradesChart").getContext("2d");
+            passedGradesChartData.datasets[0].data = StadsDataHandler.getGradeDistribution().splice(2);
+            passedGradesChart = new Chart(ctx).Bar(passedGradesChartData, {responsive: true});
+            var total = 0;
+            var weightedTotal = 0;
+            var totalECTS = 0;
+            var passedCount = 0;
+            for (var i = 0; i < StadsDataHandler.stadsData.grades.length; i++) {
+                var grade = Number(StadsDataHandler.stadsData.grades[i].grade);
+                var ects = Number(StadsDataHandler.stadsData.grades[i].ects);
+                if (isNaN(grade)
+                        || grade <= 0) {
+                    console.log("Skipped grade: " + grade);
+                    continue;
+                }
+                passedCount++;
+                total += grade;
+                weightedTotal += grade * ects;
+                totalECTS += ects;
+            }
+            $("#gradeAverage").text(total / passedCount);
+            $("#weightedGradeAverage").text(weightedTotal / totalECTS);
+        };
+        var gradeChartData = {
+            labels: ["-3", "00", "02", "4", "7", "10", "12"],
+            datasets: [
+                {
+                    label: "Grades",
+                    fillColor: 'rgba(0,60,100,1)',
+                    strokeColor: 'black',
+                    data: [0, 0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+        var passedGradesChartData = {
+            labels: ["02", "4", "7", "10", "12"],
+            datasets: [
+                {
+                    label: "Grades",
+                    fillColor: 'rgba(0,60,100,1)',
+                    strokeColor: 'black',
+                    data: [0, 0, 0, 0, 0]
+                }
+            ]
+        };
+        var averageProgressionChartData = {
+            labels: [],
+            datasets: [
+                {
+                    label: "Average",
+                    fillColor: 'rgba(0,60,100,1)',
+                    strokeColor: 'black',
+                    data: []
+                }
+            ]
+        };
+        // Get the context of the canvas element we want to select
+        var ctx = document.getElementById("averageProgressionChart").getContext("2d");
+        progressionChart = new Chart(ctx).Line(averageProgressionChartData, {responsive: true});
+        var ctx = document.getElementById("gradeChart").getContext("2d");
+        gradeChart = new Chart(ctx).Bar(gradeChartData, {responsive: true});
+        var ctx = document.getElementById("passedGradesChart").getContext("2d");
+        passedGradesChart = new Chart(ctx).Bar(passedGradesChartData, {responsive: true});
+        //Pizza.init();
+    </script>
+</footer>
+</html>
